@@ -37,7 +37,7 @@ def extract_text_from_pdf(pdf_file):
                 model="gpt-4o",
                   messages=[
                         {
-                          "role": "system",
+                          "role": "user",
                           "content": [
                             {
                               "type": "text",
