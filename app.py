@@ -59,14 +59,16 @@ def extract_text_from_pdf(pdf_file):
             ),
             #print(response.choices[0])
 
-
-
-
-
+            # If response is a tuple, unpack it
+            if isinstance(response, tuple):
+                response = response[0]
+            
+            # Now access choices
+            content = response.choices[0].message.content
             
             handwritten_text = response
             #text += handwritten_text + "\n"
-            st.write(response.choices[0].message.content)
+            st.write(content)
     
     return text
     #return response
