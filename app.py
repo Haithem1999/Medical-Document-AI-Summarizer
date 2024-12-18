@@ -68,7 +68,7 @@ def extract_text_from_pdf(pdf_file):
             #text += handwritten_text + "\n"
     
     #return text
-    return response.choice[0]
+    return response
 
 def summarize_text(text):
     try:
