@@ -35,24 +35,35 @@ def extract_text_from_pdf(pdf_file):
             # Extract text from image using OpenAI
             response = openai.chat.completions.create(
                 model="gpt-4o",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an assistant that transcribes text from images."
-                    },
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": "Please transcribe the text from this image."},
-                            {"type": "image_url", "image_url": {"url": "data:image/png;base64,", {base64_image}}
-                        ]
-                    }
-                ],
-            )
-            handwritten_text = response.choices[0].message.content
-            text += handwritten_text + "\n"
+                  messages=[
+                        {
+                          "role": "system",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "You are an assistant that transcribes text from images",
+                            },
+                            {
+                              "type": "image_url",
+                              "image_url": {
+                                "url":  f"data:image/jpeg;base64,{base64_image}"
+                              },
+                            },
+                          ],
+                        }
+                      ],
+            print(response.choices[0])
+
+
+
+
+
+            
+            #handwritten_text = response.choices[0].message.content
+            #text += handwritten_text + "\n"
     
-    return text
+    #return text
+    return response.choice[0]
 
 def summarize_text(text):
     try:
