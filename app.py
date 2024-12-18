@@ -37,7 +37,7 @@ def extract_text_from_pdf(pdf_file):
 
             client = OpenAI(api_key = api_key)
 
-            response = client.chat.completions.create(
+            response = client.ChatCompletion.create(
                 model="gpt-4o",
                   messages=[
                         {
