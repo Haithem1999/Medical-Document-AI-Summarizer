@@ -37,17 +37,17 @@ def extract_text_from_pdf(pdf_file):
                 model="gpt-4o",
                 messages=[
                     {
+                        "role": "system",
+                        "content": "You are an assistant that transcribes text from images."
+                    },
+                    {
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": "Please read and transcribe any text in this image, including handwritten content."},
-                            {
-                                "type": "image_url",
-                                "image_url": f"data:image/png;base64,{base64_image}"
-                            }
+                            {"type": "text", "text": "Please transcribe the text from this image."},
+                            {"type": "image_url", "image_url": {"url": "data:image/png;base64," + image_data.encode("base64")}}
                         ]
                     }
                 ],
-                max_tokens=1000
             )
             handwritten_text = response.choices[0].message.content
             text += handwritten_text + "\n"
