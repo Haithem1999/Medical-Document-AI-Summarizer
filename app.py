@@ -2,10 +2,10 @@ import streamlit as st
 from PyPDF2 import PdfReader
 import openai
 from PIL import Image
-import pytesseract
 import io
 import fitz  # PyMuPDF
 import os
+import base64
 
 # Configure OpenAI API
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -26,8 +26,30 @@ def extract_text_from_pdf(pdf_file):
             pix = page.get_pixmap()
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
             
-            # Extract text from image using OCR
-            handwritten_text = pytesseract.image_to_string(img)
+            # Convert image to base64 for OpenAI Vision API
+            img_byte_arr = io.BytesIO()
+            img.save(img_byte_arr, format='PNG')
+            img_byte_arr = img_byte_arr.getvalue()
+            base64_image = base64.b64encode(img_byte_arr).decode('utf-8')
+            
+            # Extract text from image using OpenAI Vision API
+            response = openai.chat.completions.create(
+                model="gpt-4-vision-preview",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "Please read and transcribe any text in this image, including handwritten content."},
+                            {
+                                "type": "image_url",
+                                "image_url": f"data:image/png;base64,{base64_image}"
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=1000
+            )
+            handwritten_text = response.choices[0].message.content
             text += handwritten_text + "\n"
     
     return text
@@ -64,3 +86,5 @@ if uploaded_file is not None:
         # Display summary
         st.subheader("Document Summary")
         st.write(summary)
+
+
