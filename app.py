@@ -32,9 +32,9 @@ def extract_text_from_pdf(pdf_file):
             img_byte_arr = img_byte_arr.getvalue()
             base64_image = base64.b64encode(img_byte_arr).decode('utf-8')
             
-            # Extract text from image using OpenAI Vision API
+            # Extract text from image using OpenAI
             response = openai.chat.completions.create(
-                model="gpt-4-vision-preview",
+                model="gpt-4o-mini-2024-07-18",
                 messages=[
                     {
                         "role": "user",
