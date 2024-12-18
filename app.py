@@ -9,7 +9,7 @@ import os
 import base64
 
 # Configure OpenAI API
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+api_key = st.secrets["OPENAI_API_KEY"]
 
 def extract_text_from_pdf(pdf_file):
     # Create PDF reader object
@@ -35,7 +35,7 @@ def extract_text_from_pdf(pdf_file):
             
             # Extract text from image using OpenAI
 
-            client = OpenAI()
+            client = OpenAI(api_key = api_key)
 
             response = client.chat.completions.create(
                 model="gpt-4o",
