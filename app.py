@@ -44,7 +44,7 @@ def extract_text_from_pdf(pdf_file):
                         "role": "user",
                         "content": [
                             {"type": "text", "text": "Please transcribe the text from this image."},
-                            {"type": "image_url", "image_url": {"url": "data:image/png;base64," + image_data.encode("base64")}}
+                            {"type": "image_url", "image_url": {"url": "data:image/png;base64,", {base64_image}}
                         ]
                     }
                 ],
