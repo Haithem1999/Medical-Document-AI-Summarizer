@@ -66,7 +66,7 @@ def process_document(file):
         base64_image = encode_image(img)
         
         vision_response = client.chat.completions.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o-mini",
             messages=[
                 {
                     "role": "user",
