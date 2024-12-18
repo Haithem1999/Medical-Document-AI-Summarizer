@@ -1,122 +1,66 @@
+import streamlit as st
 from PyPDF2 import PdfReader
-import base64
+import openai
 from PIL import Image
+import pytesseract
 import io
-from openai import OpenAI
-import tempfile
+import fitz  # PyMuPDF
+import os
 
-# Mock Streamlit Replacement
-class MockStreamlit:
-    def __init__(self):
-        self.uploaded_file = None
+# Configure OpenAI API
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-    def file_uploader(self, prompt, type=None):
-        return None
-
-    def title(self, text):
-        print(f"# {text}")
-
-    def write(self, text):
-        print(text)
-
-    def spinner(self, text):
-        print(f"[Processing] {text}")
-        class Spinner:
-            def __enter__(self):
-                pass
-            def __exit__(self, exc_type, exc_value, traceback):
-                pass
-        return Spinner()
-
-    def subheader(self, text):
-        print(f"## {text}")
-
-    def error(self, text):
-        print(f"[Error] {text}")
-
-st = MockStreamlit()
-
-# Initialize OpenAI client
-client = OpenAI(api_key="YOUR_OPENAI_API_KEY")
-
-st.title("Medical Document AI Summarizer")
-st.write("Upload your medical documents (PDF) for AI-powered summarization")
-
-def extract_images_from_pdf(pdf_path):
-    """Extract images from PDF pages for OCR processing"""
-    images = []
-    pdf = PdfReader(pdf_path)
+def extract_text_from_pdf(pdf_file):
+    # Create PDF reader object
+    pdf_reader = PdfReader(pdf_file)
+    text = ""
     
-    for page in pdf.pages:
-        if '/XObject' in page['/Resources']:
-            xObject = page['/Resources']['/XObject'].get_object()
-            
-            for obj in xObject:
-                if xObject[obj]['/Subtype'] == '/Image':
-                    data = xObject[obj].get_data()
-                    try:
-                        img = Image.open(io.BytesIO(data))
-                        images.append(img)
-                    except:
-                        continue
-    return images
-
-def encode_image(image):
-    """Encode image to base64 for OpenAI Vision API"""
-    buffered = io.BytesIO()
-    image.save(buffered, format="PNG")
-    return base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-def process_document(file):
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
-        tmp_file.write(file.getvalue())
-        pdf_path = tmp_file.name
+    # Extract text from each page
+    for page in pdf_reader.pages:
+        text += page.extract_text() + "\n"
         
-    # Extract text
-    pdf = PdfReader(pdf_path)
-    text_content = ""
-    for page in pdf.pages:
-        text_content += page.extract_text() + "\n"
+        # Convert PDF page to image to handle handwritten content
+        doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            pix = page.get_pixmap()
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            
+            # Extract text from image using OCR
+            handwritten_text = pytesseract.image_to_string(img)
+            text += handwritten_text + "\n"
     
-    # Extract and process images for handwritten content
-    images = extract_images_from_pdf(pdf_path)
-    
-    # Process both text content and images with gpt-4o-mini
-    messages = [
-        {"role": "system", "content": "You are a medical document summarizer. Provide a clear, concise summary of the medical document."},
-        {"role": "user", "content": f"Summarize this medical document:\n\n{text_content[:15000]}"}  # Limit text to avoid token limits
-    ]
+    return text
 
-    # Add images to the multimodal request
-    for img in images:
-        base64_image = encode_image(img)
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "Read and transcribe any handwritten medical content in this image. If there's no handwritten content, respond with 'No handwritten content detected'."},
-                {"type": "image_url", "image_url": f"data:image/png;base64,{base64_image}"}
-            ]
-        })
+def summarize_text(text):
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a medical expert. Summarize the following medical document, highlighting key diagnoses, treatments, and important medical findings."},
+                {"role": "user", "content": text}
+            ],
+            max_tokens=1000,
+            temperature=0.3
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Error in summarization: {str(e)}"
 
-    # Process with GPT-4o-mini
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=messages,
-        max_tokens=1500
-    )
+# Streamlit UI
+st.title("Medical Document Summarizer")
+st.write("Upload a medical PDF document to get an AI-powered summary")
 
-    # Parse response
-    outputs = response.choices[0].message.content
-    return outputs
-
-# File uploader
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
 if uploaded_file is not None:
-    with st.spinner('Processing document... This may take a few minutes for large files.'):
-        try:
-            result = process_document(uploaded_file)
-            st.subheader("Document Analysis")
-            st.write(result)
-        except Exception as e:
-            st.error(f"An error occurred while processing the document: {str(e)}")
+    with st.spinner('Processing document...'):
+        # Extract text from PDF
+        text = extract_text_from_pdf(uploaded_file)
+        
+        # Get summary
+        summary = summarize_text(text)
+        
+        # Display summary
+        st.subheader("Document Summary")
+        st.write(summary)
