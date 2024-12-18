@@ -66,9 +66,9 @@ def extract_text_from_pdf(pdf_file):
             # Now access choices
             content = response.choices[0].message.content
             
-            handwritten_text = response
-            #text += handwritten_text + "\n"
-            st.write(content)
+            handwritten_text = content
+            text += handwritten_text + "\n"
+            #st.write(content)
     
     return text
     #return response
@@ -81,7 +81,7 @@ def summarize_text(text):
                 {"role": "system", "content": "You are a medical expert. Summarize the following medical document, highlighting key diagnoses, treatments, and important medical findings."},
                 {"role": "user", "content": text}
             ],
-            max_tokens=1000,
+            #max_tokens=1000,
             temperature=0.3
         )
         return response_.choices[0].message.content
