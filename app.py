@@ -65,7 +65,8 @@ def extract_text_from_pdf(pdf_file):
 
             
             handwritten_text = response
-            text += handwritten_text + "\n"
+            #text += handwritten_text + "\n"
+            st.write(response)
     
     return text
     #return response
