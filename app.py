@@ -34,7 +34,7 @@ def extract_text_from_pdf(pdf_file):
             
             # Extract text from image using OpenAI
             response = openai.chat.completions.create(
-                model="gpt-4o-mini-2024-07-18",
+                model="gpt-4o",
                 messages=[
                     {
                         "role": "user",
@@ -57,7 +57,7 @@ def extract_text_from_pdf(pdf_file):
 def summarize_text(text):
     try:
         response = openai.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a medical expert. Summarize the following medical document, highlighting key diagnoses, treatments, and important medical findings."},
                 {"role": "user", "content": text}
