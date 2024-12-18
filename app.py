@@ -1,6 +1,7 @@
 import streamlit as st
 from PyPDF2 import PdfReader
-import openai
+#import openai
+from openai import OpenAI
 from PIL import Image
 import io
 import fitz  # PyMuPDF
@@ -33,7 +34,10 @@ def extract_text_from_pdf(pdf_file):
             base64_image = base64.b64encode(img_byte_arr).decode('utf-8')
             
             # Extract text from image using OpenAI
-            response = openai.chat.completions.create(
+
+            client = OpenAI()
+
+            response = client.chat.completions.create(
                 model="gpt-4o",
                   messages=[
                         {
