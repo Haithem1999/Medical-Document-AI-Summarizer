@@ -73,7 +73,7 @@ def extract_text_from_pdf(pdf_file):
 
 def summarize_text(text):
     try:
-        response = openai.chat.completions.create(
+        response_ = openai.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a medical expert. Summarize the following medical document, highlighting key diagnoses, treatments, and important medical findings."},
@@ -82,7 +82,7 @@ def summarize_text(text):
             max_tokens=1000,
             temperature=0.3
         )
-        return response.choices[0].message.content
+        return response_.choices[0].message.content
     except Exception as e:
         return f"Error in summarization: {str(e)}"
 
