@@ -52,6 +52,7 @@ def extract_text_from_pdf(pdf_file):
                           ],
                         }
                       ],
+            ),
             print(response.choices[0])
 
 
