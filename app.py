@@ -1,4 +1,3 @@
-import streamlit as st
 from PyPDF2 import PdfReader
 import base64
 from PIL import Image
@@ -6,8 +5,39 @@ import io
 from openai import OpenAI
 import tempfile
 
+# Mock Streamlit Replacement
+class MockStreamlit:
+    def __init__(self):
+        self.uploaded_file = None
+
+    def file_uploader(self, prompt, type=None):
+        return None
+
+    def title(self, text):
+        print(f"# {text}")
+
+    def write(self, text):
+        print(text)
+
+    def spinner(self, text):
+        print(f"[Processing] {text}")
+        class Spinner:
+            def __enter__(self):
+                pass
+            def __exit__(self, exc_type, exc_value, traceback):
+                pass
+        return Spinner()
+
+    def subheader(self, text):
+        print(f"## {text}")
+
+    def error(self, text):
+        print(f"[Error] {text}")
+
+st = MockStreamlit()
+
 # Initialize OpenAI client
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+client = OpenAI(api_key="YOUR_OPENAI_API_KEY")
 
 st.title("Medical Document AI Summarizer")
 st.write("Upload your medical documents (PDF) for AI-powered summarization")
@@ -51,39 +81,33 @@ def process_document(file):
     # Extract and process images for handwritten content
     images = extract_images_from_pdf(pdf_path)
     
-    # Process text content
-    text_summary = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a medical document summarizer. Provide a clear, concise summary of the medical document."},
-            {"role": "user", "content": f"Summarize this medical document:\n\n{text_content[:15000]}"}  # Limit text to avoid token limits
-        ]
-    )
-    
-    # Process images for handwritten content
-    handwritten_content = []
+    # Process both text content and images with gpt-4o-mini
+    messages = [
+        {"role": "system", "content": "You are a medical document summarizer. Provide a clear, concise summary of the medical document."},
+        {"role": "user", "content": f"Summarize this medical document:\n\n{text_content[:15000]}"}  # Limit text to avoid token limits
+    ]
+
+    # Add images to the multimodal request
     for img in images:
         base64_image = encode_image(img)
-        
-        vision_response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": "Read and transcribe any handwritten medical content in this image. If there's no handwritten content, respond with 'No handwritten content detected'."},
-                        {
-                            "type": "image_url",
-                            "image_url": f"data:image/png;base64,{base64_image}"
-                        }
-                    ]
-                }
-            ],
-            max_tokens=500
-        )
-        handwritten_content.append(vision_response.choices[0].message.content)
-    
-    return text_summary.choices[0].message.content, handwritten_content
+        messages.append({
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Read and transcribe any handwritten medical content in this image. If there's no handwritten content, respond with 'No handwritten content detected'."},
+                {"type": "image_url", "image_url": f"data:image/png;base64,{base64_image}"}
+            ]
+        })
+
+    # Process with GPT-4o-mini
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        max_tokens=1500
+    )
+
+    # Parse response
+    outputs = response.choices[0].message.content
+    return outputs
 
 # File uploader
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
@@ -91,16 +115,8 @@ uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 if uploaded_file is not None:
     with st.spinner('Processing document... This may take a few minutes for large files.'):
         try:
-            text_summary, handwritten_content = process_document(uploaded_file)
-            
-            st.subheader("Document Summary")
-            st.write(text_summary)
-            
-            if any(content != "No handwritten content detected" for content in handwritten_content):
-                st.subheader("Detected Handwritten Content")
-                for content in handwritten_content:
-                    if content != "No handwritten content detected":
-                        st.write(content)
-                        
+            result = process_document(uploaded_file)
+            st.subheader("Document Analysis")
+            st.write(result)
         except Exception as e:
             st.error(f"An error occurred while processing the document: {str(e)}")
