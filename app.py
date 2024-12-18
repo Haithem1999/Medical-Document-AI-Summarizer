@@ -64,7 +64,7 @@ def extract_text_from_pdf(pdf_file):
 
 
             
-            handwritten_text = response['choices'][0]['message']['content']
+            handwritten_text = response
             text += handwritten_text + "\n"
     
     return text
