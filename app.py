@@ -75,7 +75,8 @@ def extract_text_from_pdf(pdf_file):
 
 def summarize_text(text):
     try:
-        response_ = openai.chat.completions.create(
+        client = OpenAI(api_key = api_key)
+        response_ = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a medical expert. Summarize the following medical document, highlighting key diagnoses, treatments, and important medical findings."},
