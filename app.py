@@ -4,15 +4,15 @@ from openai import OpenAI
 from PIL import Image
 import io
 import fitz  # PyMuPDF
-import os
 import base64
 
 # Configure OpenAI API
 api_key = st.secrets["OPENAI_API_KEY"]
 
-def extract_text_from_pdf(pdf_file):
+@st.cache_data
+def extract_text_from_pdf(pdf_bytes):
     # Create PDF reader object
-    pdf_reader = PdfReader(pdf_file)
+    pdf_reader = PdfReader(io.BytesIO(pdf_bytes))
     text = ""
     
     # Extract text from each page
@@ -20,7 +20,7 @@ def extract_text_from_pdf(pdf_file):
         text += page.extract_text() + "\n"
         
         # Convert PDF page to image to handle handwritten content
-        doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+        doc = fitz.open(stream=io.BytesIO(pdf_bytes), filetype="pdf")
         for page_num in range(len(doc)):
             page = doc[page_num]
             pix = page.get_pixmap()
@@ -54,7 +54,7 @@ def extract_text_from_pdf(pdf_file):
                         ],
                     }
                 ],
-            ),
+            )
             
             # If response is a tuple, unpack it
             if isinstance(response, tuple):
@@ -67,6 +67,7 @@ def extract_text_from_pdf(pdf_file):
     
     return text
 
+@st.cache_data
 def summarize_text(text):
     try:
         client = OpenAI(api_key=api_key)
@@ -95,9 +96,11 @@ st.write("Upload a medical PDF document to get an AI-powered summary")
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
 if uploaded_file is not None:
+    pdf_bytes = uploaded_file.read()  # Read the PDF file as bytes
+    
     with st.spinner('Processing document...'):
         # Extract text from PDF
-        text = extract_text_from_pdf(uploaded_file)
+        text = extract_text_from_pdf(pdf_bytes)
         
         # Get summary
         summary = summarize_text(text)
@@ -106,8 +109,7 @@ if uploaded_file is not None:
         st.subheader("Document Summary")
         st.write(summary)
         
-        # --- New code: Provide a download button for the summary ---
-        # Note: summary is already a string, but you can encode it if needed.
+        # Provide a download button for the summary
         st.download_button(
             label="Download Summary",
             data=summary,
