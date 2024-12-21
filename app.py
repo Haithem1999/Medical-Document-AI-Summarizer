@@ -6,7 +6,8 @@ import io
 import fitz  # PyMuPDF
 import os
 import base64
-
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import LETTER  # or A4, etc.
 
 # Configure OpenAI API
 api_key = st.secrets["OPENAI_API_KEY"]
@@ -35,7 +36,6 @@ def extract_text_from_pdf(pdf_file):
             
             # Extract text from image using OpenAI
             client = OpenAI(api_key=api_key)
-
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -56,7 +56,7 @@ def extract_text_from_pdf(pdf_file):
                     }
                 ],
             ),
-            
+
             # If response is a tuple, unpack it
             if isinstance(response, tuple):
                 response = response[0]
@@ -89,6 +89,29 @@ def summarize_text(text):
     except Exception as e:
         return f"Error in summarization: {str(e)}"
 
+def create_pdf(summary_text):
+    """
+    Create a PDF in memory from the summary text using ReportLab
+    and return a BytesIO buffer containing the PDF data.
+    """
+    pdf_buffer = io.BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=LETTER)
+
+    # Starting position for text
+    text_object = c.beginText(50, 750)  # left margin = 50, bottom margin = 750
+    text_object.setFont("Helvetica", 12)
+
+    # Split summary into lines and draw each line
+    for line in summary_text.splitlines():
+        text_object.textLine(line)
+
+    c.drawText(text_object)
+    c.showPage()
+    c.save()
+    pdf_buffer.seek(0)
+
+    return pdf_buffer
+
 # Streamlit UI
 st.title("Medical Document Summarizer")
 st.write("Upload a medical PDF document to get an AI-powered summary")
@@ -107,7 +130,7 @@ if uploaded_file is not None:
         st.subheader("Document Summary")
         st.write(summary)
         
-        # --- NEW CODE: Provide a download button for the summary as .docx ---
+        # --- New Code: Provide a PDF download button ---
         pdf_buffer = create_pdf(summary)
         
         st.download_button(
