@@ -106,9 +106,9 @@ if uploaded_file is not None:
         st.subheader("Document Summary")
         st.write(summary)
         
-st.download_button(
-    label="Download Summary",
-    data=summary,
-    file_name="summary.txt",
-    mime="text/plain"
-)
+    st.download_button(
+        label="Download Summary",
+        data=summary,
+        file_name="summary.txt",
+        mime="text/plain"
+    )
