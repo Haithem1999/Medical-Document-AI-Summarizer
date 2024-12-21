@@ -88,27 +88,39 @@ def summarize_text(text):
     except Exception as e:
         return f"Error in summarization: {str(e)}"
 
-# Streamlit UI
+# Initialize session state for summary if not present
+if "summary" not in st.session_state:
+    st.session_state.summary = ""
+
 st.title("Medical Document Summarizer")
 st.write("Upload a medical PDF document to get an AI-powered summary")
 
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
 if uploaded_file is not None:
+    # When a new file is uploaded, we want to re-process it.
+    # Clear any old summary if a new file is uploaded
+    st.session_state.summary = ""
+
     with st.spinner('Processing document...'):
         # Extract text from PDF
         text = extract_text_from_pdf(uploaded_file)
         
         # Get summary
         summary = summarize_text(text)
-        
-        # Display summary
-        st.subheader("Document Summary")
-        st.write(summary)
-        
+
+        # Save the summary to session state
+        st.session_state.summary = summary
+
+# Only show summary and download if we have a summary in session_state
+if st.session_state.summary:
+    st.subheader("Document Summary")
+    st.write(st.session_state.summary)
+    
+    # Download button for the summary as a text file
     st.download_button(
         label="Download Summary",
-        data=summary,
+        data=st.session_state.summary,  # read from session state
         file_name="summary.txt",
         mime="text/plain"
     )
