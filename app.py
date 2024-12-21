@@ -6,7 +6,7 @@ import io
 import fitz  # PyMuPDF
 import os
 import base64
-from docx import Document  # New import for DOCX creation
+
 
 # Configure OpenAI API
 api_key = st.secrets["OPENAI_API_KEY"]
