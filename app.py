@@ -108,18 +108,11 @@ if uploaded_file is not None:
         st.write(summary)
         
         # --- NEW CODE: Provide a download button for the summary as .docx ---
-        # Create a Word document in memory
-        doc = Document()
-        doc.add_paragraph(summary)
-
-        # Save to a BytesIO buffer
-        docx_buffer = io.BytesIO()
-        doc.save(docx_buffer)
-        docx_buffer.seek(0)  # Important to reset the buffer position
-
+        pdf_buffer = create_pdf(summary)
+        
         st.download_button(
-            label="Download Summary as .docx",
-            data=docx_buffer,
-            file_name="summary.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            label="Download Summary as PDF",
+            data=pdf_buffer,
+            file_name="summary.pdf",
+            mime="application/pdf",
         )
