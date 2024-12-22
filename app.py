@@ -7,10 +7,6 @@ import fitz  # PyMuPDF
 import base64
 
 
-#GithubIcon {
-  visibility: hidden;
-}
-
 # Configure OpenAI API
 api_key = st.secrets["OPENAI_API_KEY"]
 
