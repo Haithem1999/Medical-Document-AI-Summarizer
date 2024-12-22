@@ -7,13 +7,9 @@ import fitz  # PyMuPDF
 import base64
 
 
-# Add custom CSS to hide the GitHub icon
-hide_github_icon = """
 #GithubIcon {
   visibility: hidden;
 }
-"""
-st.markdown(hide_github_icon, unsafe_allow_html=True)
 
 # Configure OpenAI API
 api_key = st.secrets["OPENAI_API_KEY"]
