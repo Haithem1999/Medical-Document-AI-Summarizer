@@ -77,7 +77,7 @@ def summarize_text(text):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are expert in extracting accurately key information and data from medical documents and summarizing them in a strict and specific format (exactly like the format of the document "AI RECORDS SUMMARY"). You need to place the extracted information in their appropriate field in the document (Client’s Name, Address, Date of Birth, Gender , Claim #, WCAB #, Date of Injury, Employer....etc). You need to fill all the possible fields correctly based on the exact info mentioned in the uploaded docment.
+                    "content": """ You are expert in extracting accurately key information and data from medical documents and summarizing them in a strict and specific format (exactly like the format of the document "AI RECORDS SUMMARY"). You need to place the extracted information in their appropriate field in the document (Client’s Name, Address, Date of Birth, Gender , Claim #, WCAB #, Date of Injury, Employer....etc). You need to fill all the possible fields correctly based on the exact info mentioned in the uploaded docment.
 
                                 Here is the format of document "AI RECORDS SUMMARY": 
 
@@ -197,7 +197,7 @@ def summarize_text(text):
                                #### End of document. 
 
 
-                                IT IS Very important that you need to extract the information and data accurately as this is very sensitive data (medical data)."
+                                IT IS Very important that you need to extract the information and data accurately as this is very sensitive data (medical data)."""
                 },
                 {
                     "role": "user",
