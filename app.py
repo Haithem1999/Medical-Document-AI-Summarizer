@@ -197,7 +197,13 @@ def summarize_text(text):
                                #### End of document. 
 
 
-                                IT IS Very important that you need to extract the information and data accurately as this is very sensitive data (medical data)."""
+                                IT IS Very important that you need to extract the information and data accurately as this is very sensitive data (medical data).
+                                
+                                After that you need to give a detailed report of all the aspects mentioned in the uploaded documents: treatments, diagnosis, symptoms, results, reports..etc. 
+                                You need to analyze every section of every page in the uploaded document and put it in a detailed report. 
+                                ### Detailed Medical Report: 
+                                
+                                """
                 },
                 {
                     "role": "user",
