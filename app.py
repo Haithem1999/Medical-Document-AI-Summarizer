@@ -73,136 +73,40 @@ def summarize_text(text):
     try:
         client = OpenAI(api_key=api_key)
         response_ = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",
-                    "content": """ You are expert in extracting accurately key information and data from medical documents and summarizing them in a strict and specific format (exactly like the format of the document "AI RECORDS SUMMARY"). You need to place the extracted information in their appropriate field in the document (Client’s Name, Address, Date of Birth, Gender , Claim #, WCAB #, Date of Injury, Employer....etc). You need to fill all the possible fields correctly based on the exact info mentioned in the uploaded docment.
+                    "content": """ You are expert in extracting accurately key information and data from medical documents and summarizing them in a strict, specific and chronological format just like the output format of MediScan.ai.  
 
-                                Here is the format of document "AI RECORDS SUMMARY": 
-
-                                #### Start of document 
-                                
-                                Client’s Name	:   
-                                Address		:   
-                                
-                                Date of Birth		:   
-                                Gender		:   
-                                Claim #		:   
-                                WCAB #		:   
-                                Date of Injury	:   
-                                Employer		:   
-                                
-                                ---------------------------------------------------------------
-                                
-                                REVIEW OF RECORDS
-                                
-                                Medical records totaling ___ pages were received for review.  The records were reviewed by myself and summarized below. Included were miscellaneous unremarkable records, _______________________________.  All of these materials were thoroughly reviewed to ensure that no relevant information was overlooked.
-                                
-                                ---------------------------------------------------------------
-                                DIAGNOSTIC TESTS
-                                
-                                
-                                TEMPLATE OPERATIVE REPORTS: 
-                                Mm/dd/yy – Author – Facility Name – Title of Report, Page. 
-                                INDICATION:
-                                SURGEON: 
-                                ANESTHESIA:
-                                PREOP DX:
-                                POSTOP DX: 
-                                PROCEDURE:
-                                FINDINGS: 
-                                IMPRESSION: 
-                                
-                                -------------------------------------------------------------------------------
-                                TEMPLATE PATHOLOGY REPORTS:
-                                Mm/dd/yy – Author – Facility Name – Title of Report, Page. 
-                                SOURCE: 
-                                RESULT:
-                                
-                                
-                                ---------------------------------------------------------------------------------
-                                TEMPLATE LABORATORY TESTS:
-                                Mm/dd/yy – Author – Facility Name – Title of Report, Page. 
-                                RESULT:
-                                
-                                
-                                TEMPLATE FOR DIAGNOSTIC TESTS:
-                                Mm/dd/yy – Author – Facility Name – Title of Report, Page. 
-                                ORDERING PHYSICIAN:
-                                INDICATION/HISTORY:
-                                FINDINGS: 
-                                IMPRESSION: 
-                                
-                                ----------------------------------------------------------------------------------
-                                MEDICAL REPORTS
-                                
-                                TEMPLATE DFR, PERMANENT AND STATIONARY REPORTS/INITIAL REPORTS/QME/AME:
-                                
-                                Mm/dd/yy – Author – Facility Name – Title of Report, Page. 
-                                DATE OF INJURY: 
-                                SUBJECTIVE COMPLAINT: 
-                                HISTORY OF PRESENT ILLNESS:
-                                TEST/s PERFORMED, DATE:
-                                OBJECTIVE FINDINGS: 
-                                VITAL SIGNS:
-                                CURRENT MEDICATIONS: (IF IM DOCTOR)
-                                ALLERGIES:
-                                PAST MEDICAL HISTORY:
-                                PAST SURGICAL HISTORY:
-                                DIAGNOSIS: 
-                                PERMANENT AND STATIONARY STATUS:
-                                APPORTIONMENT: 
-                                CAUSATION: 
-                                IMPAIRMENT RATING: 
-                                VOCATIONAL REHABILITATION: 
-                                SUBJ FACTORS OF DISABILITY:
-                                OBJ FACTORS OF DISABILITY: 
-                                DISCUSSION: 
-                                PLAN: 
-                                WORK STATUS: 
-                                
-                                TEMPLATE PT/OT/ACUPUNCTURE/CHIRO
-                                Mm/dd/yy – Author – Facility Name – Title of Report, Page. 
-                                TEMPLATE PT/OT/ACUPUNCTURE/CHIRO: 
-                                DATE OF INJURY: 
-                                SUBJECTIVE COMPLAINT: 
-                                HISTORY OF PRESENT ILLNESS:
-                                OBJECTIVE FINDINGS: 
-                                DIAGNOSIS: 
-                                PLAN: 
-                                
-                                
-                                -------------------------------------------------------------------------------------
-                                NON-MEDICAL REPORTS
-                                
-                                
-                                
-                                TEMPLATE FOR APPLICATION FOR ADJUDICATION OF CLAIM: 
-                                Mm/dd/yy – Author – Facility Name – Title of Report, Page. 
-                                DOI: 
-                                JOB: 
-                                MOI: 
-                                CC: 
-                                ------
-                                TEMPLATE FOR STIPULATIONS/AWARDS
-                                Mm/dd/yy – Author – Facility Name – Title of Report, Page. 
-                                DOI: 
-                                JOB: 
-                                CC: 
-                                SUMMARY:
-                                OTHER STIPULATIONS:
-                                AWARD: 
-                                
-                               #### End of document. 
-
-
-                                IT IS Very important that you need to extract the information and data accurately as this is very sensitive data (medical data).
-                                
-                                After that you need to give a detailed report of all the aspects mentioned in the uploaded documents: treatments, diagnosis, symptoms, results, reports..etc. 
-                                You need to analyze every section of every page in the uploaded document and put it in a detailed report. 
-                                ### Detailed Medical Report: 
-                                
+                                    IT IS Very important that you need to extract the information and data accurately and chronologically as this is very sensitive data (medical data).
+                                                                    
+                                    After that you need to give a detailed report of all the aspects mentioned in the uploaded documents: treatments, diagnosis, symptoms, results, reports..etc. 
+                                    You need to analyze every section of every page in the uploaded document and put it in a detailed report.  
+                                                                        
+                                    VERY IMPORTANT: In each uploaded document, you do the summarization based on the date and the number of pages related to that date. For example, if a document has 10 pages. The first 3 pages contain medical info for the date: 01 / 15 / 2024. You need to mention the date and the pages related to that date in the document + The title of the section and then give the summary and analysis of these 3 pages for that date and so on and so forth.  
+                                    Usually the dates of each section are mentioned in the top left corner of each page. Each section (for example 3 pages) has a unique date. A summarized anlaysis will be unique to each of these dates and number of pages. 
+                                    
+                                    Here is an example of the output format you should return:
+                                    
+                                    ---------------------------------------------------------------------------------------------------
+                                    08 / 27 / 2024 |  Request for Authorization | 7 pgs 
+                                    HPI: Patient working on a conveyor belt fell after losing balance, resulting in injuries. Initial injury on 06/15/2024, first examined on 08/15/2024. CC: Low back pain radiating down the left leg with numbness, mild limp on the left leg, pain with walking more than 1 hour, sitting more than 1 hour, bending, difficulty washing feet and putting on socks and shoes, limited lifting capacity, sleep disruption due to back pain, neck pain with needle-like sensation around the right ear, bilateral hand pain affecting lifting, shoulder pain with more pain on the left, mid to lower rib pain affecting breathing, pain rated 4-8/10. Work History: Patient employed at Grow Smart Labor Inc, working in the Tectrol department. Previous work injury in 2020 involving the left low back, head, and right index finger, but no residual limitations. Exams: Height: 63 3/4 inch. Weight: 181 lbs. BP: 185/121. Pulse: 86 bpm. Mild limp on left lower extremity, mild paracervical muscle tenderness, tenderness in anterior and lateral lower ribs, lumbar spasm left more than right, decreased sensation to pinprick in left lower extremity, weakness in left EHL, dorsiflexion, plantar flexion 4/5. DX: Low back pain, lumbar sprain/strain with left radiculopathy, cervicalgia, right and left shoulder pain with left shoulder impingement, right and left hand pain with loss of left grip strength, ribs pain. TX: Recommended obtaining x-rays of lumbar spine, bilateral hands, ribs, and bilateral shoulders. Recommended 8 sessions of physical therapy for low back and shoulders. Additional options include chiropractic, acupuncture, possible MRI, EMG/NCS of lower extremities, specialty consult.
+                                    
+                                    -----------------------------------------------------------------------------------------
+                                    
+                                    09 / 17 / 2024 | Primary Treating Physician's Progress Report (PR-2) | 3 pgs	
+                                    Primary Treating Physician's Progress Report (PR-2)
+                                    Sovathana Khuong, D.C., QME
+                                    CC: Left wrist and hand pain, neck and mid back pain, numbness along the lower ribs bilaterally, pain and numbness in low back extending into left leg, intermittent neck pain with limited motion, pain and weakness in both hands and wrists, shoulder pain worse with overhead use. Exams: Mild limp on left lower extremity, mild paracervical muscle tenderness, cervical AROM: 50 deg flexion, 45 deg extension, 35 deg RLF, 35 deg LLF, 70 deg RR, 70 deg LR, tender anterior and lateral lower ribs, difficulty sitting up due to rib pain, thoracic AROM: 10 deg flexion, 10 deg RR, 5 deg LR, difficulty heel and toe walking on left, spasm L>R paralumbar muscles, SLR positive left, facet loading maneuvers positive, lumbar AROM: fingertips to below knees, 15 deg extension, tender left ACJ, positive impingement signs left shoulder, left shoulder AROM: 125 deg flexion, 120 deg abduction, 75 deg ER, 40 deg IR, diffuse tenderness in both dorsal hands, grip strength: 16.5 lbs left, 57.0 lbs right, diffuse decreased sensation to pinprick left lower extremity, weakness left EHL, DF, PF 4/5. DX: Low back pain, lumbar sprain/strain with left radiculopathy, cervicalgia, right and left shoulder pain with left shoulder impingement, right and left hand pain with loss of left grip strength, ribs pain. TX: Condition unchanged, authorized treatment for thoracic spine, lumbar spine, and right wrist. Requested X-rays for lumbar and thoracic spine and right hand, PT for lumbar and thoracic spine. A QME needed for disputed body parts. Treatment includes Tylenol. PT not attended due to change of primary treating physician. No past work.
+                                    
+                                    ---------------------------------------------------------------------------------------------
+                                    10 / 01 / 2024 | Request for Authorization and Progress Report | 6 pgs	
+                                    Request for Authorization and Progress Report
+                                    Sova Khuong, D.C., QME
+                                    CC: Patient continues with right wrist/hand pain affecting grasping and strength activities. He remains with pain in the lower ribs, mid and low back with left leg numbness. Limitations are unchanged with prolonged walk/sit, bending and heavy lifting. Pain is rated 4-8/10. Exams: Mild limp on left lower extremity without external device. Mild paracervical muscle tenderness without midline tenderness. Tender anterior and lateral lower ribs, right upper quadrant, left upper quadrant. Difficulty heel and toe walk on left lower extremity due to pain and weakness. Spasm left greater than right paralumbar muscles. Tender left greater than right paralumbar and lumbosacral regions. Straight leg raise positive left. Facet loading maneuvers positive. Lumbar active range of motion: fingertips to below knees in flexion, 15 degrees extension. Diffuse tenderness bilateral dorsum hands and all digits without swelling or atrophy. DX: Low back pain; lumbar sprain/strain with left radiculopathy; cervicalgia; right and left shoulder pain with left shoulder impingement and left grip strength loss; ribs pain. Right wrist x-rays: no acute fracture or other acute finding. Thoracic spine x-rays: mild degenerative changes. Lumbar spine x-rays: mild degenerative changes. TX: Patient seen in follow up for his industrial injury. Unchanged condition with authorization for physical therapy for thoracic and lumbar spine pending scheduling. Course of occupational therapy for skilled hand therapy x8 for the right wrist/hand to improve grip strength recommended. Observation of response to treatment. A QME needed to address disputed parts: left wrist, neck, shoulders.
+                                    
+                                    -------------------------------------------------------------------------------------------------
                                 """
                 },
                 {
